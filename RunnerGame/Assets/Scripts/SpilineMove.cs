@@ -3,7 +3,8 @@ using UnityEngine;
 public class SpilineMove : MonoBehaviour
 {
     [SerializeField] private float speed;
-   
+    [SerializeField] private FloatingJoystick floatingJoystick;
+
 
     private Vector3 _directions;
 
@@ -15,7 +16,7 @@ public class SpilineMove : MonoBehaviour
 
     private void Update()
     {
-        _directions = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
+        _directions = new Vector3(floatingJoystick.Horizontal, 0, 0);
 
         transform.localPosition += _directions * speed * Time.deltaTime;
 

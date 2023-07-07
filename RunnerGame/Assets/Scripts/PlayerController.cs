@@ -3,25 +3,35 @@ using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float speed;
     [SerializeField] private float verticalSpeed;
     [SerializeField] private float jumpForce;
     [SerializeField] private LayerMask layer;
-    [SerializeField] GameObject finishBall;
-    [SerializeField] List<GameObject> soccerDoor;
-    [SerializeField] Animator animator;
-    [SerializeField] CinemachineVirtualCamera awayCam;
-    [SerializeField] CinemachineVirtualCamera trackingCam;
+    [SerializeField] private GameObject finishBall;
+    [SerializeField] private List<GameObject> soccerDoor;
+    [SerializeField] private Animator animator;
+    [SerializeField] private CinemachineVirtualCamera awayCam;
+    [SerializeField] private CinemachineVirtualCamera trackingCam;
+    [SerializeField] private FloatingJoystick floatingJoystick;
+    [SerializeField] public GameObject showAdds;
+    [SerializeField] private GameObject Pause;
+    [SerializeField] private GameObject gameWin;
+    //[SerializeField] private GameObject SettingPanel;
+    [SerializeField] private AudioSource AudioVolume;
+    [SerializeField] private Slider VolumeSlider;
+    [SerializeField] GameObject game;
 
-  
-    private Vector3 _direction;
+    private bool isJumped;
+    //private Vector3 _direction;
     private Rigidbody _physics;
-    float ballCount = 0f;
+    private float ballCount = 0f;
+
     void Start()
     {
+        VolumeSlider.value = 1f;
         _physics = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         
@@ -31,19 +41,64 @@ public class PlayerController : MonoBehaviour
     {
         //_direction = new Vector3(Input.GetAxis("Horizontal"), 0, verticalSpeed);
         PlayerJump();
+        PauseMenu();
+        
+    }
+    private void PauseMenu()
+    {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Pause.SetActive(true);
+            Time.timeScale = 0f;
+
+        }
 
     }
+    public void PausePanel()
+    {
+        //SettingPanel.SetActive(false);
+        Pause.SetActive(true); 
+    }
+    public void Resume()
+    {
+        Pause.SetActive(false);
+        Time.timeScale = 1f;
+    }
+    //public void Settings()
+    //{
+    //    SettingPanel.SetActive(true);
+        
+    //}
+    public void Quit()
+    {
+        UnityEditor.EditorApplication.isPlaying = false;
+    }
+    public void ClosePauseMenu()
+    {
+        Pause.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void ChangeVolume()
+    {
+        AudioVolume.volume=VolumeSlider.value;
+    }
+
 
     private void PlayerJump()
     {
         if (Physics.Raycast(transform.position, -1 * transform.up, 1f, layer))
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (floatingJoystick.Vertical > 0.7f && !isJumped)
             {
+                isJumped = true;
                 animator.SetTrigger("Jump");
-                
                 _physics.AddForce(Vector3.up * jumpForce);
             }
+        }
+        else
+        {
+            isJumped = false;
         }
 
     }
@@ -72,16 +127,20 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Barier")
         {
             
-            Restart();
+            showAdds.SetActive(true);
+            Time.timeScale = 0;
+            //Ads.Instance.RequestBanner();
+            //Restart();
         }
 
         if (collision.gameObject.CompareTag("Finish"))
         {
             awayCam.Priority = 10;
 
-            speed = 0;
+            //speed = 0;
             transform.position = new Vector3(0, transform.position.y, transform.position.z);
             animator.SetTrigger("Goal");
+
         }
     }
 
@@ -95,8 +154,16 @@ public class PlayerController : MonoBehaviour
         GameObject door = soccerDoor[UnityEngine.Random.Range(0, soccerDoor.Count)];
 
         finishBall.AddComponent<Rigidbody>();
-        finishBall.transform.DOJump(door.transform.position, 2f, 1, 0.8f);
-        animator.SetTrigger("FreeWorks");
+        finishBall.transform.DOJump(door.transform.position, 2f, 1, 0.8f).OnComplete(() =>
+        {
+            gameWin.SetActive(true);
+            Debug.Log("Oyun bItti");
+            UIManager.Instance.OpenRestartPanel();
+        });
+
+        GetComponent<TimeLine>().PlayTimeLine();// basqa skripti cagirmaq
+        
     }
+
 
 }

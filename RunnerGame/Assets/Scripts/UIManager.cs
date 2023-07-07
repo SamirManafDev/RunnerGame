@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -9,6 +8,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject startPanel;
     [SerializeField] GameObject gamePanel;
     [SerializeField] private TMP_Text countBall;
+    [SerializeField] GameObject restartPanel;
+    [SerializeField] GameObject settingsPanel;
 
     public static UIManager Instance { get; set; }
 
@@ -48,5 +49,20 @@ public class UIManager : MonoBehaviour
     {
         countBall.text = ballCount.ToString();
     }
-
+    public void OpenRestartPanel()
+    {
+       restartPanel.SetActive(true);
+    }
+    public void CloseRestartPanel()
+    {
+        restartPanel.SetActive(false);
+    }
+    public void OpenSettingsPanel()
+    {
+        settingsPanel.SetActive(true);
+    }
+    public void CloseSettingsPanel()
+    {
+        settingsPanel.SetActive(false);
+    }
 }
